@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: alarm_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - .:/app # Syncs your local code to the container for live reloading
+
+  db:
+    image: postgres:15-alpine
+    container_name: alarm_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: alarm_user
+      POSTGRES_PASSWORD: alarm_password
+      POSTGRES_DB: alarm_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
