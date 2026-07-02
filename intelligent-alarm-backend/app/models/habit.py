@@ -17,7 +17,6 @@ class HabitFrequency(str, enum.Enum):
 
 
 class Habit(Base):
-    """A single trackable habit, e.g. 'Wake up by 6 AM' or 'No snoozing'."""
     __tablename__ = "habits"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
