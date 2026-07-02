@@ -21,3 +21,7 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"message": "Intelligent Cognitive Alarm API is running."}
+
+from app.api import alarms
+
+app.include_router(alarms.router)
