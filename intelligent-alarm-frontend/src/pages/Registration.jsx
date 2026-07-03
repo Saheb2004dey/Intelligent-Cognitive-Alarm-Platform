@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./Registration.css";
 
 function Registration() {
+  const navigate = useNavigate();
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (
       fullName === "" ||
       email === "" ||
@@ -18,10 +21,38 @@ function Registration() {
       return;
     }
 
-    console.log("Full Name:", fullName);
-    console.log("Email:", email);
-    console.log("Password:", password);
-    console.log("Confirm Password:", confirmPassword);
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/users/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            full_name: fullName,
+            email: email,
+            password: password,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        alert("Registration Successful!");
+        navigate("/login");
+      } else {
+        const error = await response.json();
+        alert(error.detail || "Registration Failed");
+      }
+    } catch (error) {
+      console.log(error);
+      alert("Backend not running. Team lead will test the integration.");
+    }
   };
 
   return (
@@ -58,6 +89,10 @@ function Registration() {
         />
 
         <button onClick={handleRegister}>Register</button>
+
+        <p className="login-text">
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
       </div>
     </div>
   );
