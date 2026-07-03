@@ -1,0 +1,68 @@
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding: 40px;
+}
+
+.dashboard-container h1 {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #2c3e50;
+}
+
+.dashboard-content {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.profile-card,
+.alarm-card {
+  background: white;
+  width: 350px;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.profile-card h2,
+.alarm-card h2 {
+  margin-bottom: 20px;
+}
+
+.profile-card label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.profile-card input,
+.profile-card select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.profile-card button,
+.alarm-card button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.profile-card button:hover,
+.alarm-card button:hover {
+  background-color: #0056b3;
+}
+
+.alarm-card p {
+  margin-top: 20px;
+  color: gray;
+}
