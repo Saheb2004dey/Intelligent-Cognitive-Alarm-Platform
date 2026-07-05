@@ -9,3 +9,6 @@ bcrypt==3.2.2
 python-jose[cryptography]
 python-multipart
 motor
+pandas 
+numpy 
+scikit-learn
