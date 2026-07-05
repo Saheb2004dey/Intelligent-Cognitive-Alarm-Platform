@@ -14,8 +14,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Load environment variables
-load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
+# Load environment variables, forcing it to override any cached terminal sessions
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'), override=True)
 
 # Strictly enforce database URL without hardcoded fallback credentials
 MONGO_URL = os.getenv("MONGO_URL")
