@@ -3,11 +3,10 @@ import enum
 from datetime import datetime, date
 
 from sqlalchemy import String, Integer, Float, Enum, Date, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from app.models.base import Base
+from app.models.base import Base, GUID
 
 
 class HabitFrequency(str, enum.Enum):
@@ -19,9 +18,9 @@ class HabitFrequency(str, enum.Enum):
 class Habit(Base):
     __tablename__ = "habits"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(GUID(), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
     name: Mapped[str] = mapped_column(String(150), nullable=False)
@@ -57,9 +56,9 @@ class HabitLog(Base):
     """One daily check-in entry for a habit — powers streaks and scoring history."""
     __tablename__ = "habit_logs"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(GUID(), primary_key=True, default=uuid.uuid4)
     habit_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("habits.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey("habits.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
     log_date: Mapped[date] = mapped_column(Date, nullable=False)
