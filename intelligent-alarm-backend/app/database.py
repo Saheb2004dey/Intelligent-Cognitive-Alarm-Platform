@@ -15,7 +15,7 @@ MONGO_URL = os.getenv(
     "mongodb://mongo_user:mongo_password@localhost:27017"
 )
 
-client = AsyncIOMotorClient(MONGO_URL)
+client = AsyncIOMotorClient(MONGO_URL, serverSelectionTimeoutMS=2000)
 mongo_db = client["cognitive_alarm_logs"]
 challenge_logs_collection = mongo_db["challenge_logs"]
 
@@ -24,7 +24,12 @@ DATABASE_URL = os.getenv(
     "postgresql://alarm_user:alarm_password@127.0.0.1:5433/alarm_db"
 )
 
-engine = create_engine(DATABASE_URL, echo=True)
+# SQLite needs check_same_thread=False; Postgres does not
+connect_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, echo=True, connect_args=connect_args)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

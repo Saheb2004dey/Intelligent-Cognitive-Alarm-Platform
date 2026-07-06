@@ -6,7 +6,7 @@ from app.database import engine
 from app.models.base import Base
 # Import all models so SQLAlchemy knows they exist before creating tables
 from app.models import user, alarm, habit
-from app.api import alarms, auth
+from app.api import alarms, auth, challenges
 
 # Create all tables in the PostgreSQL database
 Base.metadata.create_all(bind=engine)
@@ -32,3 +32,4 @@ def read_root():
 
 app.include_router(alarms.router)
 app.include_router(auth.router)
+app.include_router(challenges.router)
