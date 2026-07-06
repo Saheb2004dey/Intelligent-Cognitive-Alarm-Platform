@@ -55,7 +55,8 @@ def get_next_challenge_endpoint(
     # Dynamic Target Streak: 1 puzzle by default, up to 3 if they snooze heavily
     calculated_target_streak = min(3, 1 + alarm.active_snooze_count)
 
-    key = (current_user.id, alarm_id)
+    # key = (str(current_user.id), str(alarm_id))
+    key = str(alarm_id)
     
     # Initialize or fetch the active streak state
     if key not in _pending_answers:
@@ -98,7 +99,13 @@ async def verify_challenge(
     Validates the answer. If correct, increments the streak. 
     If the streak hits the target, dismisses the alarm. If incorrect, resets the streak.
     """
-    key = (current_user.id, body.alarm_id)
+    key = str(body.alarm_id)
+    
+    # --- Debugging Logs ---
+    print(f"\n[DEBUG] Verifying Alarm ID: {key}")
+    print(f"[DEBUG] Active Dictionary Keys: {list(_pending_answers.keys())}\n")
+    # ----------------------
+    
     state = _pending_answers.get(key)
 
     if state is None or "answer" not in state:
@@ -129,7 +136,7 @@ async def verify_challenge(
     log_entry = ChallengeLog(
         user_id=str(current_user.id),
         challenge_type=state.get("challenge_type", "unknown"),
-        difficulty_level=state.get("difficulty", 1),
+        difficulty_level=str(state.get("difficulty", 1)),
         time_to_solve_seconds=0.0, # UI will provide this later
         failed_attempts=1 if not success else 0,
     )
