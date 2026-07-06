@@ -12,7 +12,7 @@ from app.models.alarm import Alarm
 from app.models.user import User
 from app.api.auth import get_current_user
 from app.core.challenge_generator import get_next_challenge
-from app.core.adaptive_ml import predict_difficulty
+from app.core.adaptive_ml import predict_next_challenge
 from app.schemas.challenge import ChallengeVerifyRequest
 from app.schemas.challenge_log import ChallengeLog
 from app.services.challenge_log_service import log_challenge_attempt
@@ -20,8 +20,8 @@ from app.services.challenge_log_service import log_challenge_attempt
 router = APIRouter(prefix="/challenges", tags=["Challenges"])
 
 # ── In-memory store for pending answers ──────────────────────────────
-# Keyed by (user_id, alarm_id) -> dict tracking answer and streak state
-_pending_answers: dict[tuple[UUID, UUID], dict] = {}
+# Keyed by alarm_id (string) -> dict tracking answer and streak state
+_pending_answers: dict[str, dict] = {}
 
 
 # ── GET /challenges/next ─────────────────────────────────────────────
@@ -34,7 +34,7 @@ def get_next_challenge_endpoint(
 ):
     """
     Fetches the next challenge. Initializes or maintains a multi-step verification
-    streak depending on the user's recent snooze behavior.
+    streak depending on the user's recent snooze behavior and ML predictions.
     """
     alarm = db.query(Alarm).filter(
         Alarm.id == alarm_id,
@@ -47,32 +47,36 @@ def get_next_challenge_endpoint(
             detail="Alarm not found or does not belong to this user.",
         )
 
-    difficulty = predict_difficulty(
-        habit_score=0.0, 
-        snooze_count=alarm.active_snooze_count,
+    # 1. Query the V2 ML Pipeline
+    # (Passing default values for historical stats until the telemetry cache is built)
+    ml_predictions = predict_next_challenge(
+        snooze_count=alarm.active_snooze_count
     )
     
-    # Dynamic Target Streak: 1 puzzle by default, up to 3 if they snooze heavily
-    calculated_target_streak = min(3, 1 + alarm.active_snooze_count)
+    difficulty = ml_predictions["difficulty"]
+    target_streak = ml_predictions["target_streak"]
+    
+    # 2. Decide the Challenge Type
+    # If frontend asks for random, let the ML engine choose the optimal challenge
+    final_challenge_type = challenge_type if challenge_type != "random" else ml_predictions["challenge_type"]
 
-    # key = (str(current_user.id), str(alarm_id))
     key = str(alarm_id)
     
-    # Initialize or fetch the active streak state
+    # 3. Initialize or fetch the active streak state
     if key not in _pending_answers:
         _pending_answers[key] = {
             "current_streak": 0,
-            "target_streak": calculated_target_streak
+            "target_streak": target_streak
         }
     else:
         # Update target streak in case they snoozed since the last request
         _pending_answers[key]["target_streak"] = max(
             _pending_answers[key]["target_streak"], 
-            calculated_target_streak
+            target_streak
         )
 
-    # Route to the cognitive engines
-    challenge_data = get_next_challenge(difficulty, challenge_type)
+    # 4. Route to the cognitive engines
+    challenge_data = get_next_challenge(difficulty, final_challenge_type)
 
     # Stash the new correct answer and type for the verify endpoint
     _pending_answers[key]["answer"] = challenge_data["server_answer"]
