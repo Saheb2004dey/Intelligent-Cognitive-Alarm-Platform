@@ -9,6 +9,7 @@ function Dashboard() {
 
   const [showCreateAlarm, setShowCreateAlarm] = useState(false);
   const [alarms, setAlarms] = useState([]);
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   // Temporary until Challenge API integration
   const isAlarmRinging = false;
@@ -38,7 +39,6 @@ function Dashboard() {
     }
   };
 
-  // Route protection + initial alarm fetch
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -50,7 +50,6 @@ function Dashboard() {
     fetchAlarms();
   }, [navigate]);
 
-  // Called after successful alarm creation
   const handleAlarmCreated = () => {
     setShowCreateAlarm(false);
     fetchAlarms();
@@ -60,64 +59,104 @@ function Dashboard() {
     <>
       {isAlarmRinging && <AlarmModal />}
 
-      <div className="dashboard-container">
-        <h1>User Dashboard</h1>
+      <div className="dashboard-layout">
+        {/* Sidebar */}
+        <aside className="sidebar">
+          <h2>Alarm App</h2>
 
-        <div className="dashboard-content">
-          <div className="profile-card">
-            <h2>Profile Settings</h2>
+          <button
+            className={activeTab === "dashboard" ? "active" : ""}
+            onClick={() => setActiveTab("dashboard")}
+          >
+            Dashboard
+          </button>
 
-            <label>Full Name</label>
-            <input type="text" placeholder="Enter your full name" />
+          <button
+            className={activeTab === "alarms" ? "active" : ""}
+            onClick={() => setActiveTab("alarms")}
+          >
+            My Alarms
+          </button>
 
-            <label>Email</label>
-            <input type="email" placeholder="Enter your email" />
+          <button
+            className={activeTab === "analytics" ? "active" : ""}
+            onClick={() => setActiveTab("analytics")}
+          >
+            Analytics
+          </button>
+        </aside>
 
-            <label>Difficulty Preference</label>
-            <select>
-              <option>Beginner</option>
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
-              <option>Expert</option>
-            </select>
+        {/* Main Content */}
+        <main className="main-content">
+          <h1>User Dashboard</h1>
 
-            <label>Timezone</label>
-            <select>
-              <option>Asia/Kolkata (IST)</option>
-              <option>UTC</option>
-              <option>America/New_York (EST)</option>
-              <option>Europe/London (GMT)</option>
-            </select>
+          {activeTab === "dashboard" && (
+            <div className="profile-card">
+              <h2>Profile Settings</h2>
 
-            <button>Save Profile</button>
-          </div>
+              <label>Full Name</label>
+              <input type="text" placeholder="Enter your full name" />
 
-          <div className="alarm-card">
-            <h2>My Alarms</h2>
+              <label>Email</label>
+              <input type="email" placeholder="Enter your email" />
 
-            {alarms.length === 0 ? (
-              <p>No alarms created yet.</p>
-            ) : (
-              alarms.map((alarm) => (
-                <div key={alarm.id}>
-                  <strong>{alarm.label}</strong>
-                  <p>{alarm.time}</p>
-                </div>
-              ))
-            )}
+              <label>Difficulty Preference</label>
+              <select>
+                <option>Beginner</option>
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
+                <option>Expert</option>
+              </select>
 
-            {!showCreateAlarm && (
-              <button onClick={() => setShowCreateAlarm(true)}>
-                Add Alarm
-              </button>
-            )}
+              <label>Timezone</label>
+              <select>
+                <option>Asia/Kolkata (IST)</option>
+                <option>UTC</option>
+                <option>America/New_York (EST)</option>
+                <option>Europe/London (GMT)</option>
+              </select>
 
-            {showCreateAlarm && (
-              <CreateAlarmForm onAlarmCreated={handleAlarmCreated} />
-            )}
-          </div>
-        </div>
+              <button>Save Profile</button>
+            </div>
+          )}
+
+          {activeTab === "alarms" && (
+            <div className="alarm-card">
+              <h2>My Alarms</h2>
+
+              {alarms.length === 0 ? (
+                <p>No alarms created yet.</p>
+              ) : (
+                alarms.map((alarm) => (
+                  <div key={alarm.id} className="alarm-item">
+                    <div>
+                      <strong>{alarm.label}</strong>
+                      <p>{alarm.time}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {!showCreateAlarm && (
+                <button onClick={() => setShowCreateAlarm(true)}>
+                  Add Alarm
+                </button>
+              )}
+
+              {showCreateAlarm && (
+                <CreateAlarmForm onAlarmCreated={handleAlarmCreated} />
+              )}
+            </div>
+          )}
+
+          {activeTab === "analytics" && (
+            <div className="profile-card">
+              <h2>Analytics</h2>
+              <p>Analytics dashboard will be added in the upcoming tasks.</p>
+            </div>
+          )}
+        </main>
       </div>
     </>
   );

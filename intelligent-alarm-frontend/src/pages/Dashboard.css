@@ -1,68 +1,149 @@
-.dashboard-container {
+.dashboard-layout {
+  display: flex;
   min-height: 100vh;
   background-color: #f5f7fa;
+}
+
+/* Sidebar */
+
+.sidebar {
+  width: 240px;
+  background-color: #1f2937;
+  color: white;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 28px;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: left;
+  transition: 0.3s;
+}
+
+.sidebar button:hover {
+  background-color: #374151;
+}
+
+.sidebar button.active {
+  background-color: #2563eb;
+}
+
+/* Main Content */
+
+.main-content {
+  flex: 1;
   padding: 40px;
 }
 
-.dashboard-container h1 {
-  text-align: center;
-  margin-bottom: 40px;
-  color: #2c3e50;
+.main-content h1 {
+  color: #1f2937;
+  margin-bottom: 30px;
 }
 
-.dashboard-content {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-}
+/* Cards */
 
 .profile-card,
 .alarm-card {
   background: white;
-  width: 350px;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  max-width: 650px;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .profile-card h2,
 .alarm-card h2 {
   margin-bottom: 20px;
+  color: #1f2937;
 }
 
 .profile-card label {
   display: block;
-  margin-top: 15px;
-  margin-bottom: 5px;
+  margin-top: 18px;
+  margin-bottom: 6px;
+  color: #374151;
 }
 
 .profile-card input,
 .profile-card select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
 }
 
 .profile-card button,
 .alarm-card button {
   width: 100%;
   margin-top: 20px;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
+  padding: 12px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  background-color: #2563eb;
+  color: white;
   cursor: pointer;
+  font-size: 15px;
 }
 
 .profile-card button:hover,
 .alarm-card button:hover {
-  background-color: #0056b3;
+  background-color: #1d4ed8;
+}
+
+.alarm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
 }
 
 .alarm-card p {
-  margin-top: 20px;
-  color: gray;
+  color: #6b7280;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .sidebar h2 {
+    display: none;
+  }
+
+  .sidebar button {
+    margin-bottom: 0;
+    text-align: center;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
 }
