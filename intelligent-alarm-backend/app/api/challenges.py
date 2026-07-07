@@ -142,6 +142,8 @@ async def verify_challenge(
         challenge_type=state.get("challenge_type", "unknown"),
         difficulty_level=str(state.get("difficulty", 1)),
         time_to_solve_seconds=0.0, # UI will provide this later
+        time_taken_ms=0,           
+        timeout_failed=False,     
         failed_attempts=1 if not success else 0,
     )
     
