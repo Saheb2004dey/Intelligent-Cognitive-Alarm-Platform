@@ -41,7 +41,30 @@ function Login() {
 
         alert("Login Successful!");
 
-        navigate("/dashboard");
+        // Fetch logged-in user's profile
+        const profileRes = await fetch(
+          "http://127.0.0.1:8000/users/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${data.access_token}`,
+            },
+          }
+        );
+
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+
+          console.log("Profile:", profileData);
+
+          if (profileData.role === "ADMIN") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/dashboard");
+          }
+        } else {
+          // Fallback if profile request fails
+          navigate("/dashboard");
+        }
       } else {
         const error = await response.text();
         console.log("Login Error:", error);
@@ -75,7 +98,8 @@ function Login() {
         <button onClick={handleLogin}>Login</button>
 
         <p className="register-text">
-          Don't have an account? <Link to="/register">Register</Link>
+          Don't have an account?{" "}
+          <Link to="/register">Register</Link>
         </p>
       </div>
     </div>

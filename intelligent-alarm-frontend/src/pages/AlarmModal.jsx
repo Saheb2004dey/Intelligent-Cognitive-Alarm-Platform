@@ -177,7 +177,21 @@ const renderChallenge = () => {
           ))}
         </div>
       );
+case "word_scramble":
+  return (
+    <div>
+      <h2>{challenge?.content?.prompt}</h2>
 
+      <h1
+        style={{
+          letterSpacing: "5px",
+          color: "#2563eb",
+        }}
+      >
+        {challenge?.content?.scrambled_word}
+      </h1>
+    </div>
+  );
     default:
       return (
         <h2>{challenge?.content?.prompt}</h2>
