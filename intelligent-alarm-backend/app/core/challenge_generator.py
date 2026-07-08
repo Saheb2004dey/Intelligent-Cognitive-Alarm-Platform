@@ -10,6 +10,7 @@ from app.core.static_engines import (
     generate_riddle,
     generate_quiz
 )
+from app.core.llm_generator import generate_ai_challenge
 
 def generate_math_problem(difficulty: int, user_id: str | None = None, total_attempts: int = 0) -> dict:
     """Baseline math engine updated to match the new universal JSON contract with uniqueness."""
@@ -42,10 +43,10 @@ def generate_math_problem(difficulty: int, user_id: str | None = None, total_att
 
 def get_next_challenge(difficulty: int, challenge_type: str = "random", user_id: str | None = None, total_attempts: int = 0) -> dict:
     """
-    Acts as the master router. Routes the request to the correct engine
-    based on the requested challenge type.
+    Acts as the master router. Routes the request to the AI engines first, 
+    falling back to static algorithms if the LLM fails.
     """
-    engines = {
+    static_engines = {
         "math": generate_math_problem,
         "memory": generate_memory_sequence,
         "pattern": generate_pattern_recognition,
@@ -55,11 +56,23 @@ def get_next_challenge(difficulty: int, challenge_type: str = "random", user_id:
         "quiz": generate_quiz
     }
     
-    if challenge_type == "random" or challenge_type not in engines:
+    if challenge_type == "random" or challenge_type not in static_engines:
         r = get_local_random(user_id, total_attempts)
-        challenge_type = r.choice(list(engines.keys()))
+        challenge_type = r.choice(list(static_engines.keys()))
         
-    engine_function = engines[challenge_type]
+    # ── AI ROUTING LAYER (Groq Llama 3) ──
+    semantic_types = ["riddle", "word_scramble", "logic", "quiz"]
+    
+    if challenge_type in semantic_types:
+        try:
+            # Attempt to generate infinite AI puzzle
+            return generate_ai_challenge(challenge_type, difficulty, avoid_topics=[])
+        except Exception as e:
+            print(f"[WARNING] Groq API failed for {challenge_type}. Falling back to static engine. Error: {e}")
+            # Silently fall down to the static engine execution block below
+
+    # ── STATIC FALLBACK LAYER ──
+    engine_function = static_engines[challenge_type]
     
     if engine_function == generate_logic_puzzle:
         return engine_function(difficulty)
