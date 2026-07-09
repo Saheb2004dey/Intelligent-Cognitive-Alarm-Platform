@@ -12,6 +12,7 @@ class AlarmBase(BaseModel):
     recurrence_days: Optional[str] = None
     snooze_enabled: bool = True
     snooze_limit: int = 3
+    preferred_challenges: Optional[str] = None # NEW
 
 class AlarmCreate(AlarmBase):
     """Payload expected from the frontend when creating an alarm."""

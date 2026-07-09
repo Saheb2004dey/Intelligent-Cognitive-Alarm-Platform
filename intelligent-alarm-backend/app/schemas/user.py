@@ -20,6 +20,7 @@ class UserProfileUpdate(BaseModel):
     timezone: Optional[str] = None
     difficulty_preference: Optional[str] = None
     productivity_goal: Optional[str] = None
+    preferred_challenges: Optional[str] = None # NEW
 
 class UserResponse(BaseModel):
     id: UUID
@@ -28,6 +29,8 @@ class UserResponse(BaseModel):
     timezone: str
     difficulty_preference: Optional[str] = None
     productivity_goal: Optional[str] = None
+    preferred_challenges: Optional[str] = None # NEW
+    role: str # Added so frontend router can clearly see it
 
     class Config:
         from_attributes = True

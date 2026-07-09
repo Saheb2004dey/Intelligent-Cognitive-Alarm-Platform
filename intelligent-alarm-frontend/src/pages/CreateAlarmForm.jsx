@@ -8,6 +8,21 @@ function CreateAlarmForm({ onAlarmCreated }) {
   const [recurrenceDays, setRecurrenceDays] = useState("");
   const [snoozeEnabled, setSnoozeEnabled] = useState(true);
   const [snoozeLimit, setSnoozeLimit] = useState(3);
+  
+  // NEW: Track selected challenges
+  const [preferredChallenges, setPreferredChallenges] = useState([]);
+
+  const availableChallenges = [
+    "math", "memory", "pattern", "logic", "word_scramble", "riddle", "quiz"
+  ];
+
+  const handleChallengeToggle = (challenge) => {
+    setPreferredChallenges((prev) =>
+      prev.includes(challenge)
+        ? prev.filter((c) => c !== challenge)
+        : [...prev, challenge]
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,16 +49,17 @@ function CreateAlarmForm({ onAlarmCreated }) {
           recurrence_days: recurrenceDays || null,
           snooze_enabled: snoozeEnabled,
           snooze_limit: snoozeLimit,
+          // NEW: Flatten the array to a comma-separated string, or send null if empty
+          preferred_challenges: preferredChallenges.length > 0 ? preferredChallenges.join(",") : null,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-
         console.log("Alarm Created:", data);
-
         alert("Alarm created successfully!");
 
+        // Reset form
         setLabel("");
         setTime("");
         setAlarmType("daily");
@@ -51,18 +67,14 @@ function CreateAlarmForm({ onAlarmCreated }) {
         setRecurrenceDays("");
         setSnoozeEnabled(true);
         setSnoozeLimit(3);
+        setPreferredChallenges([]);
 
         if (onAlarmCreated) {
           onAlarmCreated();
         }
       } else {
         const errorData = await response.json();
-
-        console.log(
-          "Create Alarm Error:",
-          JSON.stringify(errorData, null, 2)
-        );
-
+        console.log("Create Alarm Error:", JSON.stringify(errorData, null, 2));
         alert(JSON.stringify(errorData, null, 2));
       }
     } catch (error) {
@@ -109,6 +121,25 @@ function CreateAlarmForm({ onAlarmCreated }) {
         value={recurrenceDays}
         onChange={(e) => setRecurrenceDays(e.target.value)}
       />
+
+      {/* NEW: Challenge Selector UI */}
+      <div style={{ marginTop: "15px", marginBottom: "15px" }}>
+        <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>
+          Allowed Challenges (Leave blank for all)
+        </label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+          {availableChallenges.map((challenge) => (
+            <label key={challenge} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "14px" }}>
+              <input
+                type="checkbox"
+                checked={preferredChallenges.includes(challenge)}
+                onChange={() => handleChallengeToggle(challenge)}
+              />
+              {challenge.replace("_", " ").toUpperCase()}
+            </label>
+          ))}
+        </div>
+      </div>
 
       <div>
         <label>
