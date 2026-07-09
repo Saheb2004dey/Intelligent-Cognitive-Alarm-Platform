@@ -70,8 +70,9 @@ useEffect(() => {
           }),
         }
       );
+const data = await response.json();
 
-      if (!response.ok) {
+      if (!data.success) {
         alert("Wrong answer!");
         return;
       }
