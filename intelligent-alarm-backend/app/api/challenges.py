@@ -3,6 +3,8 @@ Challenge endpoints — connects the frontend to the cognitive master router,
 enforces multi-step wake-up verification (streaks), and logs telemetry to MongoDB.
 """
 
+import re
+import string
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -22,6 +24,19 @@ router = APIRouter(prefix="/challenges", tags=["Challenges"])
 # ── In-memory store for pending answers ──────────────────────────────
 # Keyed by alarm_id (string) -> dict tracking answer and streak state
 _pending_answers: dict[str, dict] = {}
+
+
+def normalize_text(text: str) -> str:
+    """
+    Strips punctuation, articles, and extra spaces for UX-friendly matching.
+    """
+    text = str(text).lower()
+    # Remove punctuation using standard string translation
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    # Remove common grammatical articles that users might casually type
+    text = re.sub(r'\b(a|an|the)\b', ' ', text)
+    # Strip any double spaces created by the regex
+    return ' '.join(text.split())
 
 
 # ── GET /challenges/next ─────────────────────────────────────────────
@@ -48,7 +63,6 @@ async def get_next_challenge_endpoint(
         )
 
     # 1. Query the V2 ML Pipeline
-    # (Passing default values for historical stats until the telemetry cache is built)
     ml_predictions = predict_next_challenge(
         snooze_count=alarm.active_snooze_count
     )
@@ -57,7 +71,6 @@ async def get_next_challenge_endpoint(
     target_streak = ml_predictions["target_streak"]
     
     # 2. Decide the Challenge Type
-    # If frontend asks for random, let the ML engine choose the optimal challenge
     final_challenge_type = challenge_type if challenge_type != "random" else ml_predictions["challenge_type"]
 
     key = str(alarm_id)
@@ -78,13 +91,17 @@ async def get_next_challenge_endpoint(
     # Fetch total attempts from MongoDB
     total_attempts = await get_total_attempts(str(current_user.id))
 
-    # 4. Route to the cognitive engines (using both user_id and alarm_id to ensure different alarms get different math/cognitive problems)
+    # --- Fetch UX Preferences (Alarm overrides User) ---
+    allowed_types = alarm.preferred_challenges or current_user.preferred_challenges
+
+    # 4. Route to the cognitive engines
     user_seed_key = f"{current_user.id}_{alarm_id}"
     challenge_data = get_next_challenge(
         difficulty=difficulty,
         challenge_type=final_challenge_type,
         user_id=user_seed_key,
-        total_attempts=total_attempts
+        total_attempts=total_attempts,
+        allowed_types=allowed_types # Pass preferences to the generator!
     )
 
     # Stash the new correct answer and type for the verify endpoint
@@ -114,11 +131,6 @@ async def verify_challenge(
     """
     key = str(body.alarm_id)
     
-    # --- Debugging Logs ---
-    print(f"\n[DEBUG] Verifying Alarm ID: {key}")
-    print(f"[DEBUG] Active Dictionary Keys: {list(_pending_answers.keys())}\n")
-    # ----------------------
-    
     state = _pending_answers.get(key)
 
     if state is None or "answer" not in state:
@@ -127,11 +139,19 @@ async def verify_challenge(
             detail="No active challenge found. Request a new one via GET /challenges/next.",
         )
 
-    # Normalize answers for text-based cognitive engines (lowercase, stripped)
-    user_ans = str(body.answer).strip().lower()
-    correct_ans = str(state["answer"]).strip().lower()
+    # --- UX Fix: Normalize answers to forgive minor formatting differences ---
+    norm_user = normalize_text(body.answer)
+    norm_correct = normalize_text(state["answer"])
+    
+    print(f"\n[DEBUG] Verification Engine:")
+    print(f"        User Input (Raw)    : '{body.answer}'")
+    print(f"        User Input (Norm)   : '{norm_user}'")
+    print(f"        Expected   (Norm)   : '{norm_correct}'")
 
-    success = (user_ans == correct_ans)
+    # Check for exact match on normalized strings OR if the expected word is found inside the user's string
+    success = (norm_user == norm_correct) or (norm_correct != "" and norm_correct in norm_user.split())
+    # -------------------------------------------------------------------------
+    
     dismiss_alarm = False
 
     if success:
@@ -164,6 +184,6 @@ async def verify_challenge(
     return {
         "success": success,
         "dismiss_alarm": dismiss_alarm,
-        "current_streak": state.get("current_streak", 0),
-        "target_streak": state.get("target_streak", 1)
+        "current_streak": state.get("current_streak", 0) if state else 0,
+        "target_streak": state.get("target_streak", 1) if state else 1
     }

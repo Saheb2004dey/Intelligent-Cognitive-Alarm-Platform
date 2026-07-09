@@ -1,13 +1,12 @@
 import uuid
 import enum
-from datetime import datetime, time,date
+from datetime import datetime, time, date
 
 from sqlalchemy import String, Boolean, Enum, Time, DateTime, ForeignKey, Date, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.models.base import Base, GUID
-
 
 
 class AlarmType(str, enum.Enum):
@@ -32,6 +31,9 @@ class Alarm(Base):
 
     # For recurring alarms — store active weekdays, e.g. "MON,TUE,WED"
     recurrence_days: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    
+    # NEW: Alarm-specific challenge override (comma-separated, e.g., "math,logic")
+    preferred_challenges: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     snooze_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
