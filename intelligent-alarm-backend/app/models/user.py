@@ -45,8 +45,8 @@ class User(Base):
     )
     productivity_goal: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    target_bedtime:   Mapped[datetime | None] = mapped_column(Time(timezone=True), nullable=True)
-    target_wake_time: Mapped[datetime | None] = mapped_column(Time(timezone=True), nullable=True)
+    target_bedtime:   Mapped[time | None] = mapped_column(Time(timezone=True), nullable=True)
+    target_wake_time: Mapped[time | None] = mapped_column(Time(timezone=True), nullable=True)
     habit_score:      Mapped[float]           = mapped_column(Float,   default=0.0, nullable=False)
     current_streak:   Mapped[int]             = mapped_column(Integer, default=0,   nullable=False)
     
