@@ -10,7 +10,7 @@ export default function RegisterScreen({ navigation }: any) {
   const handleRegister = async () => {
     try {
       const payload = { full_name: fullName, email, password };
-      await api.post('/auth/register', payload);
+      await api.post('/users/register', payload);
       
       Alert.alert("Success", "Account created! Please log in.");
       navigation.navigate('Login');
