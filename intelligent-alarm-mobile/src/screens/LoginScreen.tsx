@@ -12,15 +12,16 @@ export default function LoginScreen({ navigation }: any) {
       // FastAPI OAuth2 strictly requires form-urlencoded data
       const formData = `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
       
-      const response = await api.post('/auth/login', formData, {
+      const response = await api.post('/users/login', formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
 
-      if (response.data.access_token) {
+     if (response.data.access_token) {
         // Securely stash the JWT on the device hardware
         await SecureStore.setItemAsync('access_token', response.data.access_token);
         Alert.alert("Success", "Welcome back to your Cognitive Alarm!");
-        // We will route to Dashboard here in Phase 3
+      
+        navigation.replace('Dashboard');
       }
     } catch (error) {
       Alert.alert("Error", "Invalid credentials or network issue.");
