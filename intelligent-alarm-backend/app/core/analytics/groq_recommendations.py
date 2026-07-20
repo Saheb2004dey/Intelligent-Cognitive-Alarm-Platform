@@ -39,7 +39,7 @@ async def generate_ai_recommendations(user_name: str, telemetry_data: dict, habi
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             temperature=0.7,
             response_format={"type": "json_object"}
         )
