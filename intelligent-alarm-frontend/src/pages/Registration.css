@@ -1,0 +1,16 @@
+.login-text {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.login-text a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-text a:hover {
+  text-decoration: underline;
+}

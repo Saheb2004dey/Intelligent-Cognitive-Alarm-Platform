@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: alarm_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - .:/app # Syncs your local code to the container for live reloading
+
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: alarm_postgres
+  #   restart: always
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     POSTGRES_USER: alarm_user
+  #     POSTGRES_PASSWORD: alarm_password
+  #     POSTGRES_DB: alarm_db
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+  db:
+    image: postgres:15-alpine
+    container_name: alarm_postgres
+    restart: always
+    ports:
+      - "5433:5432" 
+    environment:
+      POSTGRES_USER: alarm_user
+      POSTGRES_PASSWORD: alarm_password
+      POSTGRES_DB: alarm_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:7
+    container_name: cognitive_alarm_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_user
+      MONGO_INITDB_ROOT_PASSWORD: mongo_password
+      MONGO_INITDB_DATABASE: cognitive_alarm_logs
+    ports:
+      - "27018:27018"
+    volumes:
+      - mongo_data:/data/db
+    
+  redis:
+    image: redis:7-alpine
+    container_name: redis_container
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes   # persist data on restart
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+
+volumes:
+  postgres_data:
+  mongo_data:
+  redis_data:
