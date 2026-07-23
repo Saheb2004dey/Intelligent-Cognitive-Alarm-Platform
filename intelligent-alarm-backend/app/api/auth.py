@@ -61,24 +61,3 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
-
-@router.get("/profile", response_model=UserResponse)
-def get_profile(current_user: User = Depends(get_current_user)):
-    """View the currently logged-in user's profile."""
-    return current_user
-
-@router.put("/profile", response_model=UserResponse)
-def update_profile(profile_data: UserProfileUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Update profile settings (like timezone or difficulty preference)."""
-    if profile_data.full_name is not None:
-        current_user.full_name = profile_data.full_name
-    if profile_data.timezone is not None:
-        current_user.timezone = profile_data.timezone
-    if profile_data.difficulty_preference is not None:
-        current_user.difficulty_preference = profile_data.difficulty_preference
-    if profile_data.productivity_goal is not None:
-        current_user.productivity_goal = profile_data.productivity_goal
-
-    db.commit()
-    db.refresh(current_user)
-    return current_user
